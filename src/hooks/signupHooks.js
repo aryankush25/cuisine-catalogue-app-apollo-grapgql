@@ -1,29 +1,31 @@
+import { useState } from 'react';
 import * as R from 'ramda';
 import { useHistory } from 'react-router-dom';
 import { useMutation } from '@apollo/react-hooks';
 import { SIGNIN_USER_MUTATION } from '../apollo/actions/user';
-import { HOME_ROUTE } from '../utils/routesNavigationConstants';
-import { setLocalStorageTokens } from '../utils/tokensHelper';
-import { getResponseBody } from '../utils/helper';
+import { LOGIN_ROUTE } from '../utils/routesNavigationConstants';
 
 export const useSignupHook = () => {
   const history = useHistory();
+  const [formValues, setFormValues] = useState({
+    username: '',
+    password: '',
+    name: ''
+  });
 
   const [signup, { loading }] = useMutation(SIGNIN_USER_MUTATION);
 
   const goto = (path) => history.push(path);
 
-  const onSubmit = async ({ email, password, name }) => {
+  const onSubmit = async (event) => {
+    event.preventDefault();
+
+    const { username, password, name } = formValues;
+
     try {
-      const response = await signup({ variables: { email, password, name } });
-      const responseData = getResponseBody(response);
+      await signup({ variables: { username, password, name } });
 
-      setLocalStorageTokens({
-        accessToken: R.pathOr('', ['login', 'accessToken'], responseData),
-        userEmail: R.pathOr('', ['login', 'user', 'email'], responseData)
-      });
-
-      goto(HOME_ROUTE);
+      goto(LOGIN_ROUTE);
     } catch (error) {
       const errorMessage = R.pathOr(
         'Something Wrong Happened',
@@ -35,8 +37,16 @@ export const useSignupHook = () => {
     }
   };
 
+  const onChangeFormValues = (event) =>
+    setFormValues({
+      ...formValues,
+      [event.target.name]: event.target.value
+    });
+
   return {
     loading,
+    formValues,
+    onChangeFormValues,
     onSubmit,
     goto
   };

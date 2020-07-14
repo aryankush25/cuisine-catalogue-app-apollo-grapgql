@@ -1,8 +1,8 @@
 import * as R from 'ramda';
 import { isNilOrEmpty } from './helper';
 
-const MY_WEB_APP_TOKENS = 'fifo-web-tokens';
-const TOKENS = ['accessToken', 'userEmail'];
+const MY_WEB_APP_TOKENS = 'my-web-app-tokens';
+const TOKENS = ['accessToken', 'username'];
 
 export const getLocalStorageTokens = () => {
   const currentTokensString = localStorage.getItem(MY_WEB_APP_TOKENS);
